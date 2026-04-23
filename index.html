@@ -15,7 +15,21 @@
     .pb-safe { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
     .page-hidden { display: none !important; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
-    input, select { -webkit-appearance: none; }
+    input[type="date"], input[type="text"], input[type="number"], select { -webkit-appearance: none; }
+    
+    /* 自訂打勾核取方塊樣式 */
+    .checkbox-custom {
+      appearance: none; background-color: #fff; margin: 0; font: inherit; color: currentColor;
+      width: 1.25em; height: 1.25em; border: 2px solid #E6D5C3; border-radius: 0.35em;
+      display: grid; place-content: center; transition: all 0.2s ease-in-out;
+    }
+    .checkbox-custom::before {
+      content: ""; width: 0.65em; height: 0.65em; transform: scale(0); transition: 120ms transform ease-in-out;
+      box-shadow: inset 1em 1em white; background-color: white; transform-origin: center;
+      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    }
+    .checkbox-custom:checked { background-color: #C6A682; border-color: #C6A682; }
+    .checkbox-custom:checked::before { transform: scale(1); }
   </style>
 </head>
 <body class="text-gray-800 pb-24">
@@ -32,11 +46,15 @@
   </header>
 
   <main id="page-itinerary" class="p-5 space-y-4">
-    <div id="itinerary-list"></div>
+    <div id="itinerary-list"><div class="text-center text-gray-400 py-10">讀取中...</div></div>
   </main>
 
   <main id="page-guide" class="p-5 space-y-4 page-hidden">
     <div id="guide-list"></div>
+  </main>
+
+  <main id="page-checklist" class="p-5 space-y-4 page-hidden">
+    <div id="checklist-list"></div>
   </main>
 
   <main id="page-accounting" class="p-5 page-hidden">
@@ -58,82 +76,162 @@
   </main>
 
   <nav class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-5 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)] rounded-t-3xl z-[99]">
-    <button onclick="switchTab('itinerary', this)" class="nav-btn text-[#C6A682] font-bold flex flex-col items-center"><span class="text-2xl mb-1">📅</span><span class="text-xs">行程</span></button>
-    <button onclick="switchTab('guide', this)" class="nav-btn text-gray-300 flex flex-col items-center"><span class="text-2xl mb-1">📝</span><span class="text-xs">指南</span></button>
-    <button onclick="switchTab('accounting', this)" class="nav-btn text-gray-300 flex flex-col items-center"><span class="text-2xl mb-1">💰</span><span class="text-xs">記帳</span></button>
+    <button onclick="switchTab('itinerary', this)" class="nav-btn text-[#C6A682] font-bold flex flex-col items-center w-1/4"><span class="text-2xl mb-1">📅</span><span class="text-[10px]">行程</span></button>
+    <button onclick="switchTab('guide', this)" class="nav-btn text-gray-300 flex flex-col items-center w-1/4 transition-colors"><span class="text-2xl mb-1">📝</span><span class="text-[10px]">指南</span></button>
+    <button onclick="switchTab('checklist', this)" class="nav-btn text-gray-300 flex flex-col items-center w-1/4 transition-colors"><span class="text-2xl mb-1">✅</span><span class="text-[10px]">檢查</span></button>
+    <button onclick="switchTab('accounting', this)" class="nav-btn text-gray-300 flex flex-col items-center w-1/4 transition-colors"><span class="text-2xl mb-1">💰</span><span class="text-[10px]">記帳</span></button>
   </nav>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbz15YO769Vw04uqb1Y8RXinVEHVNNj8QnwVP0K-aeoRzCQGsqfxmjGJhj9Vktkxw-WB3A/exec"; 
+    // ⚠️ 請填入你最新部署的 GAS 網址
+    const API_URL = "請把這段中文字替換成你的_GAS_網址"; 
+    
     let globalItinerary = [];
     let globalGuide = [];
+    let globalChecklist = [];
     let currentDate = "2026/06/07";
+    // 從手機讀取已經打勾的項目
+    let checkedItemsState = JSON.parse(localStorage.getItem('kyoto_checked_items') || '{}');
 
     async function loadData() {
-      // 優先載入快取
       const cached = localStorage.getItem('kyoto_data');
       if (cached) {
         const d = JSON.parse(cached);
-        globalItinerary = d.itinerary;
-        globalGuide = d.guide;
-        renderItinerary();
-        renderGuide();
+        globalItinerary = d.itinerary || [];
+        globalGuide = d.guide || [];
+        globalChecklist = d.checklist || [];
+        renderAll();
       }
 
       try {
         const res = await fetch(API_URL);
         const result = await res.json();
         if(result.status === "success") {
-          globalItinerary = result.itinerary;
-          globalGuide = result.guide;
+          globalItinerary = result.itinerary || [];
+          globalGuide = result.guide || [];
+          globalChecklist = result.checklist || [];
           localStorage.setItem('kyoto_data', JSON.stringify(result));
-          renderItinerary();
-          renderGuide();
+          renderAll();
         }
       } catch (e) {}
     }
 
-    function renderGuide() {
-      const container = document.getElementById('guide-list');
-      container.innerHTML = '';
-      globalGuide.forEach(item => {
-        const card = `
-          <div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="text-2xl">${item.Icon || '📌'}</span>
-              <h3 class="font-bold text-gray-800">${item.Title}</h3>
-            </div>
-            <p class="text-sm text-gray-500 mb-3">${item.Description || ''}</p>
-            ${item.Link_URL ? `<a href="${item.Link_URL}" target="_blank" class="inline-block bg-[#FDF8F5] text-[#C6A682] text-xs font-bold px-4 py-2 rounded-xl border border-[#E6D5C3]">開啟連結</a>` : ''}
-          </div>
-        `;
-        container.innerHTML += card;
-      });
+    function renderAll() {
+      renderItinerary();
+      renderGuide();
+      renderChecklist();
     }
 
-    // 行程渲染與 Tab 切換邏輯 (同前，但資料來源改為 globalItinerary)
+    // --- 渲染 Checklist 邏輯 ---
+    function renderChecklist() {
+      const container = document.getElementById('checklist-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!globalChecklist || globalChecklist.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-400 py-10">尚未新增檢查項目 🧳</div>';
+        return;
+      }
+
+      // 將資料依照 Category 分組
+      const groups = {};
+      globalChecklist.forEach(item => {
+        const cat = item.Category || item.category || '未分類';
+        if(!groups[cat]) groups[cat] = [];
+        groups[cat].push(item);
+      });
+
+      for (const [cat, items] of Object.entries(groups)) {
+        let itemsHtml = items.map(item => {
+          const itemName = item.Item || item.item;
+          const note = item.Note || item.note || '';
+          const isChecked = checkedItemsState[itemName] ? 'checked' : '';
+          const textStyle = checkedItemsState[itemName] ? 'line-through text-gray-400' : 'text-gray-800';
+
+          return `
+            <label class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer">
+              <input type="checkbox" class="checkbox-custom mt-0.5 flex-shrink-0" value="${itemName}" ${isChecked} onchange="toggleCheck(this)">
+              <div class="flex-1">
+                <div class="font-bold text-sm ${textStyle} item-text transition-colors duration-200">${itemName}</div>
+                ${note ? `<div class="text-[11px] text-gray-500 mt-0.5 leading-tight">${note}</div>` : ''}
+              </div>
+            </label>
+          `;
+        }).join('');
+
+        container.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl shadow-sm mb-4">
+            <h3 class="text-xs font-bold text-[#C6A682] mb-2 px-2">${cat}</h3>
+            <div class="space-y-0.5">${itemsHtml}</div>
+          </div>
+        `;
+      }
+    }
+
+    // --- 打勾切換邏輯 ---
+    function toggleCheck(checkbox) {
+      const itemName = checkbox.value;
+      const textDiv = checkbox.nextElementSibling.querySelector('.item-text');
+      
+      if (checkbox.checked) {
+        checkedItemsState[itemName] = true;
+        textDiv.classList.add('line-through', 'text-gray-400');
+        textDiv.classList.remove('text-gray-800');
+      } else {
+        delete checkedItemsState[itemName];
+        textDiv.classList.remove('line-through', 'text-gray-400');
+        textDiv.classList.add('text-gray-800');
+      }
+      // 存回手機記憶體
+      localStorage.setItem('kyoto_checked_items', JSON.stringify(checkedItemsState));
+    }
+
+    // --- 行程渲染 ---
     function renderItinerary() {
       const container = document.getElementById('itinerary-list');
       container.innerHTML = '';
       const daily = globalItinerary.filter(item => item.Date === currentDate);
+      if(daily.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-10">無行程資料</div>'; return; }
       daily.forEach(item => {
-        const card = `<div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
+        container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
           <div class="flex justify-between items-center mb-2"><div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time} - ${item.End_Time}</div><div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category}</div></div>
           <h3 class="text-[17px] font-bold text-gray-800 mb-1">${item.Subject}</h3>
           <p class="text-sm text-gray-500 mb-2">${item.Description || ''}</p>
           ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100">🚃 ${item.Transport_Hint}</div>` : ''}
         </div>`;
-        container.innerHTML += card;
       });
     }
 
+    // --- 指南渲染 ---
+    function renderGuide() {
+      const container = document.getElementById('guide-list');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!globalGuide || globalGuide.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-10">無指南資料</div>'; return; }
+      globalGuide.forEach(item => {
+        const title = item.Title || item.title || "未命名"; const desc = item.Description || item.description || "";
+        const icon = item.Icon || item.icon || "📌"; const url = item.Link_URL || item.link_url || null;
+        container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
+          <div class="flex items-center gap-3 mb-2"><span class="text-2xl">${icon}</span><h3 class="font-bold text-gray-800">${title}</h3></div>
+          <p class="text-sm text-gray-500 mb-3">${desc}</p>
+          ${url ? `<a href="${url}" target="_blank" class="inline-block bg-[#FDF8F5] text-[#C6A682] text-xs font-bold px-4 py-2 rounded-xl border border-[#E6D5C3]">開啟連結</a>` : ''}
+        </div>`;
+      });
+    }
+
+    // --- Tab 切換 ---
     function switchTab(id, btn) {
       document.querySelectorAll('main').forEach(m => m.classList.add('page-hidden'));
       document.getElementById('page-' + id).classList.remove('page-hidden');
       document.getElementById('date-tabs').style.display = id === 'itinerary' ? 'flex' : 'none';
-      document.getElementById('header-title').innerText = id === 'itinerary' ? 'Kyoto 2026' : (id === 'guide' ? '旅行指南' : '新增記帳');
-      document.querySelectorAll('.nav-btn').forEach(b => b.className = "nav-btn text-gray-300 flex flex-col items-center");
-      btn.className = "nav-btn text-[#C6A682] font-bold flex flex-col items-center";
+      
+      const titles = { 'itinerary': 'Kyoto 2026', 'guide': '旅行指南', 'checklist': '物品檢查', 'accounting': '新增記帳' };
+      document.getElementById('header-title').innerText = titles[id];
+      
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.className = "nav-btn text-gray-300 flex flex-col items-center w-1/4 transition-colors";
+      });
+      btn.className = "nav-btn text-[#C6A682] font-bold flex flex-col items-center w-1/4 transition-colors";
     }
 
     function changeDate(d, btn) {
@@ -143,14 +241,12 @@
       renderItinerary();
     }
 
+    // --- 記帳送出 ---
     async function sendData() {
-      // 記帳傳送邏輯與前版一致...
       const btn = document.getElementById('submit-btn');
       const data = {
-        date: document.getElementById('exp-date').value,
-        category: document.getElementById('exp-category').value,
-        item: document.getElementById('exp-item').value,
-        amount: document.getElementById('exp-amount').value,
+        date: document.getElementById('exp-date').value, category: document.getElementById('exp-category').value,
+        item: document.getElementById('exp-item').value, amount: document.getElementById('exp-amount').value,
         currency: document.getElementById('exp-currency').value
       };
       if(!data.item || !data.amount) return alert('請填寫完整資訊');
@@ -160,11 +256,13 @@
         document.getElementById('status-msg').innerText = "🎉 記帳成功！";
         document.getElementById('status-msg').className = "mb-4 p-3 rounded-xl text-center text-sm bg-green-100 text-green-700 block";
         document.getElementById('expense-form').reset();
+        document.getElementById('exp-date').value = "2026-06-07";
       } catch (e) {}
       btn.disabled = false; btn.innerText = "送出記帳";
       setTimeout(() => document.getElementById('status-msg').classList.add('hidden'), 3000);
     }
 
+    // 啟動 App
     loadData();
   </script>
 </body>
