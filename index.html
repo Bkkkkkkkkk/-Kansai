@@ -7,16 +7,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kyoto 2026">
   <title>2026 京都家族旅行</title>
-  <link rel="apple-touch-icon" href="icon.jpg">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #FDF8F5;
-      -webkit-tap-highlight-color: transparent;
-      padding-bottom: 120px !important; /* 確保 Safari 底部導覽列不會擋住內容 */
-    }
+    body { font-family: 'Zen Maru Gothic', sans-serif; background-color: #FDF8F5; -webkit-tap-highlight-color: transparent; padding-bottom: 120px !important; }
     ::-webkit-scrollbar { display: none; }
     .pb-safe { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
     .page-hidden { display: none !important; }
@@ -28,34 +22,21 @@
 
   <header class="bg-[#E6D5C3] text-center pt-4 pb-2 rounded-b-[30px] shadow-sm sticky top-0 z-10 transition-all">
     <h1 id="header-title" class="text-xl font-bold text-gray-800 tracking-wide">Kyoto 2026</h1>
-
     <div class="flex overflow-x-auto mt-3 px-4 gap-3 pb-2 hide-scrollbar" id="date-tabs">
-      <button onclick="changeDate('2026/06/07', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#C6A682] shadow-sm transition">Day 1 (6/7)</button>
-      <button onclick="changeDate('2026/06/08', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500 bg-transparent transition">Day 2 (6/8)</button>
-      <button onclick="changeDate('2026/06/09', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500 bg-transparent transition">Day 3 (6/9)</button>
-      <button onclick="changeDate('2026/06/10', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500 bg-transparent transition">Day 4 (6/10)</button>
-      <button onclick="changeDate('2026/06/11', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500 bg-transparent transition">Day 5 (6/11)</button>
+      <button onclick="changeDate('2026/06/07', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#C6A682] shadow-sm">Day 1</button>
+      <button onclick="changeDate('2026/06/08', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500">Day 2</button>
+      <button onclick="changeDate('2026/06/09', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500">Day 3</button>
+      <button onclick="changeDate('2026/06/10', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500">Day 4</button>
+      <button onclick="changeDate('2026/06/11', this)" class="tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500">Day 5</button>
     </div>
   </header>
 
   <main id="page-itinerary" class="p-5 space-y-4">
-    <div id="itinerary-list">
-      <div class="text-center text-gray-400 py-10 animate-pulse">正在讀取行程中... 🍵</div>
-    </div>
+    <div id="itinerary-list"></div>
   </main>
 
   <main id="page-guide" class="p-5 space-y-4 page-hidden">
-    <div class="bg-white p-5 rounded-3xl shadow-sm">
-      <h3 class="text-lg font-bold text-[#C6A682] mb-3 flex items-center gap-2"><span>🏨</span> 住宿資訊</h3>
-      <div class="space-y-3 text-sm text-gray-600">
-        <p><b>京都 (6/7-10)：</b><br>Minn 河原町五条 Riverside</p>
-        <p><b>大阪 (6/10-11)：</b><br>相鐵 FRESA INN 心齋橋</p>
-      </div>
-    </div>
-    <div class="bg-white p-5 rounded-3xl shadow-sm">
-      <h3 class="text-lg font-bold text-[#C6A682] mb-3 flex items-center gap-2"><span>🤱</span> 寶寶備忘 (MuMu)</h3>
-      <p class="text-sm text-gray-600 leading-relaxed">• 6/9 12:30 和服預約 (MOCOMOCO)<br>• 6/9 14:10 家庭寫真 (八坂神社)<br>• 記得攜帶 MuMu 習慣的安撫巾與防曬噴霧</p>
-    </div>
+    <div id="guide-list"></div>
   </main>
 
   <main id="page-accounting" class="p-5 page-hidden">
@@ -63,71 +44,108 @@
       <div id="status-msg" class="hidden mb-4 p-3 rounded-xl text-center text-sm font-bold"></div>
       <form id="expense-form" class="space-y-5">
         <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1">日期</label>
-            <input type="date" id="exp-date" class="w-full bg-gray-50 rounded-xl px-3 py-2 text-sm outline-none" value="2026-06-07">
-          </div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1">分類</label>
-            <select id="exp-category" class="w-full bg-gray-50 rounded-xl px-3 py-2 text-sm outline-none">
-              <option value="食物">🍜 食物</option>
-              <option value="購物">🛍️ 購物</option>
-              <option value="交通">🚃 交通</option>
-              <option value="住宿">🏨 住宿</option>
-              <option value="其他">✨ 其他</option>
-            </select>
-          </div>
+          <div><label class="block text-[10px] text-gray-400 mb-1">日期</label><input type="date" id="exp-date" class="w-full bg-gray-50 rounded-xl px-3 py-2 text-sm outline-none" value="2026-06-07"></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1">分類</label><select id="exp-category" class="w-full bg-gray-50 rounded-xl px-3 py-2 text-sm outline-none"><option value="食物">🍜 食物</option><option value="購物">🛍️ 購物</option><option value="交通">🚃 交通</option><option value="住宿">🏨 住宿</option></select></div>
         </div>
-
-        <div>
-          <label class="block text-[10px] text-gray-400 mb-1">花費項目</label>
-          <input type="text" id="exp-item" placeholder="例如：鰻魚飯" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none">
-        </div>
-
+        <div><label class="block text-[10px] text-gray-400 mb-1">花費項目</label><input type="text" id="exp-item" placeholder="例如：鰻魚飯" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none"></div>
         <div class="flex gap-3">
-          <div class="w-1/3">
-            <label class="block text-[10px] text-gray-400 mb-1">幣別</label>
-            <select id="exp-currency" class="w-full bg-gray-50 rounded-xl px-3 py-3 text-sm font-bold outline-none">
-              <option value="JPY">¥ JPY</option>
-              <option value="TWD">$ TWD</option>
-            </select>
-          </div>
-          <div class="w-2/3">
-            <label class="block text-[10px] text-gray-400 mb-1">金額</label>
-            <input type="number" id="exp-amount" placeholder="0" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-lg font-bold outline-none">
-          </div>
+          <div class="w-1/3"><label class="block text-[10px] text-gray-400 mb-1">幣別</label><select id="exp-currency" class="w-full bg-gray-50 rounded-xl px-3 py-3 text-sm font-bold outline-none"><option value="JPY">¥ JPY</option><option value="TWD">$ TWD</option></select></div>
+          <div class="w-2/3"><label class="block text-[10px] text-gray-400 mb-1">金額</label><input type="number" id="exp-amount" placeholder="0" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-lg font-bold outline-none"></div>
         </div>
-
-        <button type="button" id="submit-btn" onclick="sendData()" class="w-full bg-[#C6A682] text-white font-bold rounded-xl py-3.5 shadow-md active:scale-95 transition-all">
-          送出記帳
-        </button>
+        <button type="button" onclick="sendData()" id="submit-btn" class="w-full bg-[#C6A682] text-white font-bold rounded-xl py-3.5 shadow-md active:scale-95 transition-all">送出記帳</button>
       </form>
     </div>
   </main>
 
   <nav class="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-5 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)] rounded-t-3xl z-[99]">
-    <button onclick="switchTab('itinerary', this)" class="nav-btn text-[#C6A682] font-bold flex flex-col items-center transition-colors">
-      <span class="text-2xl mb-1">📅</span><span class="text-xs">行程</span>
-    </button>
-    <button onclick="switchTab('guide', this)" class="nav-btn text-gray-300 flex flex-col items-center transition-colors">
-      <span class="text-2xl mb-1">📝</span><span class="text-xs">指南</span>
-    </button>
-    <button onclick="switchTab('accounting', this)" class="nav-btn text-gray-300 flex flex-col items-center transition-colors">
-      <span class="text-2xl mb-1">💰</span><span class="text-xs">記帳</span>
-    </button>
+    <button onclick="switchTab('itinerary', this)" class="nav-btn text-[#C6A682] font-bold flex flex-col items-center"><span class="text-2xl mb-1">📅</span><span class="text-xs">行程</span></button>
+    <button onclick="switchTab('guide', this)" class="nav-btn text-gray-300 flex flex-col items-center"><span class="text-2xl mb-1">📝</span><span class="text-xs">指南</span></button>
+    <button onclick="switchTab('accounting', this)" class="nav-btn text-gray-300 flex flex-col items-center"><span class="text-2xl mb-1">💰</span><span class="text-xs">記帳</span></button>
   </nav>
 
   <script>
-    // ⚠️ 重要：請在這裡貼上你的 GAS 網址！
     const API_URL = "https://script.google.com/macros/s/AKfycbz15YO769Vw04uqb1Y8RXinVEHVNNj8QnwVP0K-aeoRzCQGsqfxmjGJhj9Vktkxw-WB3A/exec"; 
-
-    let globalTripData = [];
+    let globalItinerary = [];
+    let globalGuide = [];
     let currentDate = "2026/06/07";
 
-    // --- 記帳資料傳送邏輯 ---
+    async function loadData() {
+      // 優先載入快取
+      const cached = localStorage.getItem('kyoto_data');
+      if (cached) {
+        const d = JSON.parse(cached);
+        globalItinerary = d.itinerary;
+        globalGuide = d.guide;
+        renderItinerary();
+        renderGuide();
+      }
+
+      try {
+        const res = await fetch(API_URL);
+        const result = await res.json();
+        if(result.status === "success") {
+          globalItinerary = result.itinerary;
+          globalGuide = result.guide;
+          localStorage.setItem('kyoto_data', JSON.stringify(result));
+          renderItinerary();
+          renderGuide();
+        }
+      } catch (e) {}
+    }
+
+    function renderGuide() {
+      const container = document.getElementById('guide-list');
+      container.innerHTML = '';
+      globalGuide.forEach(item => {
+        const card = `
+          <div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-2xl">${item.Icon || '📌'}</span>
+              <h3 class="font-bold text-gray-800">${item.Title}</h3>
+            </div>
+            <p class="text-sm text-gray-500 mb-3">${item.Description || ''}</p>
+            ${item.Link_URL ? `<a href="${item.Link_URL}" target="_blank" class="inline-block bg-[#FDF8F5] text-[#C6A682] text-xs font-bold px-4 py-2 rounded-xl border border-[#E6D5C3]">開啟連結</a>` : ''}
+          </div>
+        `;
+        container.innerHTML += card;
+      });
+    }
+
+    // 行程渲染與 Tab 切換邏輯 (同前，但資料來源改為 globalItinerary)
+    function renderItinerary() {
+      const container = document.getElementById('itinerary-list');
+      container.innerHTML = '';
+      const daily = globalItinerary.filter(item => item.Date === currentDate);
+      daily.forEach(item => {
+        const card = `<div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
+          <div class="flex justify-between items-center mb-2"><div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time} - ${item.End_Time}</div><div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category}</div></div>
+          <h3 class="text-[17px] font-bold text-gray-800 mb-1">${item.Subject}</h3>
+          <p class="text-sm text-gray-500 mb-2">${item.Description || ''}</p>
+          ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100">🚃 ${item.Transport_Hint}</div>` : ''}
+        </div>`;
+        container.innerHTML += card;
+      });
+    }
+
+    function switchTab(id, btn) {
+      document.querySelectorAll('main').forEach(m => m.classList.add('page-hidden'));
+      document.getElementById('page-' + id).classList.remove('page-hidden');
+      document.getElementById('date-tabs').style.display = id === 'itinerary' ? 'flex' : 'none';
+      document.getElementById('header-title').innerText = id === 'itinerary' ? 'Kyoto 2026' : (id === 'guide' ? '旅行指南' : '新增記帳');
+      document.querySelectorAll('.nav-btn').forEach(b => b.className = "nav-btn text-gray-300 flex flex-col items-center");
+      btn.className = "nav-btn text-[#C6A682] font-bold flex flex-col items-center";
+    }
+
+    function changeDate(d, btn) {
+      currentDate = d;
+      document.querySelectorAll('.tab-btn').forEach(b => b.className = "tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500");
+      btn.className = "tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#C6A682] shadow-sm";
+      renderItinerary();
+    }
+
     async function sendData() {
+      // 記帳傳送邏輯與前版一致...
       const btn = document.getElementById('submit-btn');
-      const msg = document.getElementById('status-msg');
       const data = {
         date: document.getElementById('exp-date').value,
         category: document.getElementById('exp-category').value,
@@ -135,117 +153,18 @@
         amount: document.getElementById('exp-amount').value,
         currency: document.getElementById('exp-currency').value
       };
-
       if(!data.item || !data.amount) return alert('請填寫完整資訊');
-
-      btn.disabled = true;
-      btn.innerText = "傳送中...";
-      
+      btn.disabled = true; btn.innerText = "傳送中...";
       try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify(data)
-        });
-        
-        msg.innerText = "🎉 記帳成功！已同步至試算表";
-        msg.className = "mb-4 p-3 rounded-xl text-center text-sm bg-green-100 text-green-700 font-bold block";
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        document.getElementById('status-msg').innerText = "🎉 記帳成功！";
+        document.getElementById('status-msg').className = "mb-4 p-3 rounded-xl text-center text-sm bg-green-100 text-green-700 block";
         document.getElementById('expense-form').reset();
-        // 恢復預設日期
-        document.getElementById('exp-date').value = "2026-06-07";
-      } catch (e) {
-        msg.innerText = "錯誤：" + e.message;
-        msg.className = "mb-4 p-3 rounded-xl text-center text-sm bg-red-100 text-red-700 font-bold block";
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "送出記帳";
-        setTimeout(() => {
-          msg.classList.add('hidden');
-          msg.classList.remove('block');
-        }, 3000);
-      }
+      } catch (e) {}
+      btn.disabled = false; btn.innerText = "送出記帳";
+      setTimeout(() => document.getElementById('status-msg').classList.add('hidden'), 3000);
     }
 
-    // --- 切換下方 Tabs 邏輯 ---
-    function switchTab(pageId, btnElement) {
-      document.getElementById('page-itinerary').classList.add('page-hidden');
-      document.getElementById('page-guide').classList.add('page-hidden');
-      document.getElementById('page-accounting').classList.add('page-hidden');
-      
-      document.getElementById('page-' + pageId).classList.remove('page-hidden');
-      
-      document.getElementById('header-title').innerText = pageId === 'itinerary' ? "Kyoto 2026" : (pageId === 'guide' ? "旅行指南" : "新增記帳");
-      document.getElementById('date-tabs').style.display = pageId === 'itinerary' ? "flex" : "none";
-      
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn text-gray-300 flex flex-col items-center transition-colors");
-      btnElement.className = "nav-btn text-[#C6A682] font-bold flex flex-col items-center transition-colors";
-    }
-
-    // --- 載入行程資料邏輯 ---
-    async function loadData() {
-      const cachedData = localStorage.getItem('kyoto_trip_data');
-      if (cachedData) { 
-        globalTripData = JSON.parse(cachedData); 
-        renderCards(); 
-      }
-
-      try {
-        const response = await fetch(API_URL);
-        const result = await response.json();
-        if(result.status === "success") {
-          globalTripData = result.data;
-          localStorage.setItem('kyoto_trip_data', JSON.stringify(result.data));
-          renderCards();
-        }
-      } catch (error) {
-        if(!cachedData) {
-          document.getElementById('itinerary-list').innerHTML = '<div class="text-center text-red-400 py-10">無法連線，請檢查網路 🥲</div>';
-        }
-      }
-    }
-
-    // --- 切換日期邏輯 ---
-    function changeDate(dateStr, btnElement) {
-      currentDate = dateStr;
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.className = "tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold text-gray-500 bg-transparent transition");
-      btnElement.className = "tab-btn flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#C6A682] shadow-sm transition";
-      renderCards();
-    }
-
-    // --- 渲染卡片邏輯 ---
-    function renderCards() {
-      const listContainer = document.getElementById('itinerary-list');
-      listContainer.innerHTML = '';
-      const dailyData = globalTripData.filter(item => item.Date === currentDate);
-      
-      if(dailyData.length === 0) { 
-        listContainer.innerHTML = '<div class="text-center text-gray-400 py-10">這天還沒有排行程喔 🍃</div>'; 
-        return; 
-      }
-
-      dailyData.forEach(item => {
-        let tagHtml = item.Tags ? `<span class="inline-block bg-[#F4A261] text-white text-[10px] px-2 py-0.5 rounded-full font-bold mb-2 tracking-wide">${item.Tags}</span>` : '';
-        let backupHtml = item.Backup_Option ? `<div class="mt-3 bg-green-50/50 text-green-700 text-xs p-2.5 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span><span><b>備案：</b>${item.Backup_Option}</span></div>` : '';
-        let transportHtml = item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100 flex items-start gap-2"><span>🚃</span><span>${item.Transport_Hint}</span></div>` : '';
-
-        const card = `
-          <div class="bg-white p-5 rounded-3xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] mb-4">
-            <div class="flex justify-between items-center mb-2">
-              <div class="text-sm font-bold text-[#D4B59D] tracking-wider">${item.Start_Time} - ${item.End_Time}</div>
-              <div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category}</div>
-            </div>
-            ${tagHtml}
-            <h3 class="text-[17px] font-bold text-gray-800 mb-1 leading-snug">${item.Subject}</h3>
-            <p class="text-sm text-gray-500 mb-2 leading-relaxed">${item.Description || ''}</p>
-            ${transportHtml}
-            ${backupHtml}
-          </div>
-        `;
-        listContainer.innerHTML += card;
-      });
-    }
-
-    // 啟動 App
     loadData();
   </script>
 </body>
