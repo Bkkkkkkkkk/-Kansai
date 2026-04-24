@@ -237,7 +237,7 @@
       catch (e) { console.error("同步失敗", e); } finally { checkbox.disabled = false; }
     }
 
-    function renderItinerary() {
+ function renderItinerary() {
       const container = document.getElementById('itinerary-list');
       if (!container) return;
       container.innerHTML = '';
@@ -250,20 +250,23 @@
         
         container.innerHTML += `
         <div class="bg-white p-5 rounded-3xl shadow-sm mb-4 relative overflow-hidden">
+          
           <div class="flex justify-between items-center mb-2">
             <div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time || ''} - ${item.End_Time || ''}</div>
-            <div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category || ''}</div>
+            <div class="flex items-center gap-2">
+              ${mapUrl ? `<a href="${mapUrl}" target="_blank" class="bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
+              <div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category || ''}</div>
+            </div>
           </div>
           
-          <h3 class="text-[17px] font-bold text-gray-800 mb-1 pr-12">${item.Subject || ''}</h3>
+          <h3 class="text-[17px] font-bold text-gray-800 mb-1">${item.Subject || ''}</h3>
           <p class="text-sm text-gray-500 mb-2">${item.Description || ''}</p>
           
           ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100 flex items-start gap-2"><span>🚃</span> <span>${item.Transport_Hint}</span></div>` : ''}
           
           ${backup ? `<div class="mt-2 bg-green-50/50 text-green-800 text-xs p-2.5 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span> <span><b>備案：</b>${backup}</span></div>` : ''}
           
-          ${mapUrl ? `<a href="${mapUrl}" target="_blank" class="absolute top-14 right-5 bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
-        </div>`; // ✅ 這裡幫你把 </div>`; 補回來了！
+        </div>`;
       });
     }
 
