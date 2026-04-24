@@ -18,6 +18,7 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     input[type="date"], input[type="text"], input[type="number"], select { -webkit-appearance: none; }
     
+    /* 自訂打勾核取方塊樣式 */
     .checkbox-custom {
       appearance: none; background-color: #fff; margin: 0; font: inherit; color: currentColor;
       width: 1.25em; height: 1.25em; border: 2px solid #E6D5C3; border-radius: 0.35em;
@@ -93,7 +94,7 @@
     let globalItinerary = [];
     let globalGuide = [];
     let globalChecklist = [];
-    let globalShopping = []; // 新增購物變數
+    let globalShopping = [];
     let currentDate = "2026/06/07";
 
     async function loadData() {
@@ -131,7 +132,7 @@
       renderItinerary();
       renderGuide();
       renderChecklist();
-      renderShopping(); // 確保呼叫購物的渲染函式
+      renderShopping();
     }
 
     function renderChecklist() {
@@ -174,7 +175,6 @@
       }
     }
 
-    // --- 全新的購物清單渲染邏輯 ---
     function renderShopping() {
       const container = document.getElementById('shopping-list');
       if (!container) return;
@@ -226,7 +226,6 @@
       catch (e) { console.error("同步失敗", e); } finally { checkbox.disabled = false; }
     }
 
-    // --- 購物清單專用的打勾同步邏輯 ---
     async function toggleShoppingCheck(checkbox) {
       const itemName = checkbox.value;
       const isChecked = checkbox.checked;
@@ -246,7 +245,6 @@
       if(daily.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-10">這天還沒有排行程喔 🍃</div>'; return; }
       
       daily.forEach(item => {
-        // 讀取新增的兩個欄位
         const mapUrl = item.Map_URL || item.map_url || '';
         const backup = item.Backup || item.backup || '';
         
@@ -265,6 +263,7 @@
           ${backup ? `<div class="mt-2 bg-green-50/50 text-green-800 text-xs p-2.5 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span> <span><b>備案：</b>${backup}</span></div>` : ''}
           
           ${mapUrl ? `<a href="${mapUrl}" target="_blank" class="absolute top-14 right-5 bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
+        </div>`; // ✅ 這裡幫你把 </div>`; 補回來了！
       });
     }
 
@@ -288,12 +287,8 @@
       document.querySelectorAll('main').forEach(m => m.classList.add('page-hidden'));
       document.getElementById('page-' + id).classList.remove('page-hidden');
       document.getElementById('date-tabs').style.display = id === 'itinerary' ? 'flex' : 'none';
-      
-      // 更新這行，加入 shopping 的標題對應
       const titles = { 'itinerary': 'Kyoto 2026', 'guide': '旅行指南', 'checklist': '物品檢查', 'shopping': '購物清單', 'accounting': '新增記帳' };
       document.getElementById('header-title').innerText = titles[id];
-      
-      // 將按鈕寬度改為 w-1/5 (20%)，確保 5 個按鈕排得下
       document.querySelectorAll('.nav-btn').forEach(b => b.className = "nav-btn text-gray-300 flex flex-col items-center w-1/5 transition-colors");
       btn.className = "nav-btn text-[#C6A682] font-bold flex flex-col items-center w-1/5 transition-colors";
     }
