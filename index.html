@@ -244,12 +244,27 @@
       container.innerHTML = '';
       const daily = globalItinerary.filter(item => item.Date === currentDate);
       if(daily.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-10">這天還沒有排行程喔 🍃</div>'; return; }
+      
       daily.forEach(item => {
-        container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm mb-4">
-          <div class="flex justify-between items-center mb-2"><div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time || ''} - ${item.End_Time || ''}</div><div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category || ''}</div></div>
-          <h3 class="text-[17px] font-bold text-gray-800 mb-1">${item.Subject || ''}</h3>
+        // 讀取新增的兩個欄位
+        const mapUrl = item.Map_URL || item.map_url || '';
+        const backup = item.Backup || item.backup || '';
+        
+        container.innerHTML += `
+        <div class="bg-white p-5 rounded-3xl shadow-sm mb-4 relative overflow-hidden">
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time || ''} - ${item.End_Time || ''}</div>
+            <div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category || ''}</div>
+          </div>
+          
+          <h3 class="text-[17px] font-bold text-gray-800 mb-1 pr-12">${item.Subject || ''}</h3>
           <p class="text-sm text-gray-500 mb-2">${item.Description || ''}</p>
-          ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100">🚃 ${item.Transport_Hint}</div>` : ''}
+          
+          ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100 flex items-start gap-2"><span>🚃</span> <span>${item.Transport_Hint}</span></div>` : ''}
+          
+          ${backup ? `<div class="mt-2 bg-green-50/50 text-green-800 text-xs p-2.5 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span> <span><b>備案：</b>${backup}</span></div>` : ''}
+          
+          ${mapUrl ? `<a href="${mapUrl}" target="_blank" class="absolute top-10 right-4 bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
         </div>`;
       });
     }
