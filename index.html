@@ -55,10 +55,30 @@
   </main>
 
   <main id="page-checklist" class="p-5 space-y-4 page-hidden">
+    <div class="bg-white p-4 rounded-3xl shadow-sm mb-4 border-2 border-dashed border-[#E6D5C3]">
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <input type="text" id="add-check-cat" placeholder="分類 (如: 證件)" class="bg-gray-50 rounded-xl px-3 py-2 text-xs outline-none">
+        <input type="text" id="add-check-item" placeholder="項目名稱" class="bg-gray-50 rounded-xl px-3 py-2 text-xs outline-none">
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="add-check-note" placeholder="備註 (選填)" class="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-xs outline-none">
+        <button onclick="addNewListItem('Checklist')" class="bg-[#C6A682] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">新增</button>
+      </div>
+    </div>
     <div id="checklist-list"></div>
   </main>
 
   <main id="page-shopping" class="p-5 space-y-4 page-hidden">
+    <div class="bg-white p-4 rounded-3xl shadow-sm mb-4 border-2 border-dashed border-[#E6D5C3]">
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <input type="text" id="add-shop-store" placeholder="店家 (如: 阿卡將)" class="bg-gray-50 rounded-xl px-3 py-2 text-xs outline-none">
+        <input type="text" id="add-shop-item" placeholder="物品名稱" class="bg-gray-50 rounded-xl px-3 py-2 text-xs outline-none">
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="add-shop-note" placeholder="備註/價格 (選填)" class="flex-1 bg-gray-50 rounded-xl px-3 py-2 text-xs outline-none">
+        <button onclick="addNewListItem('Shopping')" class="bg-[#C6A682] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">新增</button>
+      </div>
+    </div>
     <div id="shopping-list"></div>
   </main>
 
@@ -144,7 +164,45 @@
         console.error("API 連線錯誤", e);
       }
     }
+  async function addNewListItem(type) {
+      const isCheck = type === 'Checklist';
+      const col1 = document.getElementById(isCheck ? 'add-check-cat' : 'add-shop-store').value;
+      const col2 = document.getElementById(isCheck ? 'add-check-item' : 'add-shop-item').value;
+      const col3 = document.getElementById(isCheck ? 'add-check-note' : 'add-shop-note').value;
 
+      if (!col1 || !col2) return alert('請至少輸入分類與名稱 📝');
+
+      const btn = event.target;
+      const originalText = btn.innerText;
+      btn.disabled = true; btn.innerText = "⏳";
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: "add_item",
+            sheet: type,
+            col1: col1,
+            col2: col2,
+            col3: col3
+          })
+        });
+
+        // 清空輸入框
+        document.getElementById(isCheck ? 'add-check-cat' : 'add-shop-store').value = '';
+        document.getElementById(isCheck ? 'add-check-item' : 'add-shop-item').value = '';
+        document.getElementById(isCheck ? 'add-check-note' : 'add-shop-note').value = '';
+
+        // 💡 關鍵：新增成功後，立刻重新讀取資料，讓新項目出現在清單中
+        await loadData(); 
+        
+      } catch (e) {
+        alert('連線失敗');
+      } finally {
+        btn.disabled = false; btn.innerText = originalText;
+      }
+    }
     function renderAll() {
       renderItinerary();
       renderGuide();
