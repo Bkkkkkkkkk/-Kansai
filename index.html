@@ -62,20 +62,37 @@
     <div id="shopping-list"></div>
   </main>
 
-  <main id="page-accounting" class="p-5 page-hidden">
-    <div class="bg-white p-6 rounded-3xl shadow-sm">
+ <main id="page-accounting" class="p-5 page-hidden">
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-50">
       <div id="status-msg" class="hidden mb-4 p-3 rounded-xl text-center text-sm font-bold"></div>
-      <form id="expense-form" class="space-y-5">
+      <form id="expense-form" class="space-y-4">
+        
         <div class="grid grid-cols-2 gap-4">
           <div><label class="block text-[10px] text-gray-400 mb-1">日期</label><input type="date" id="exp-date" class="w-full bg-gray-50 rounded-xl px-3 py-2 text-sm outline-none" value="2026-06-07"></div>
           <div><label class="block text-[10px] text-gray-400 mb-1">分類</label><select id="exp-category" class="w-full bg-gray-50 rounded-xl px-3 py-2 text-sm outline-none"><option value="食物">🍜 食物</option><option value="購物">🛍️ 購物</option><option value="交通">🚃 交通</option><option value="住宿">🏨 住宿</option></select></div>
         </div>
-        <div><label class="block text-[10px] text-gray-400 mb-1">花費項目</label><input type="text" id="exp-item" placeholder="例如：鰻魚飯" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none"></div>
+        
+        <div><label class="block text-[10px] text-gray-400 mb-1">花費項目</label><input type="text" id="exp-item" placeholder="例如：松本清藥妝" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none"></div>
+        
         <div class="flex gap-3">
           <div class="w-1/3"><label class="block text-[10px] text-gray-400 mb-1">幣別</label><select id="exp-currency" class="w-full bg-gray-50 rounded-xl px-3 py-3 text-sm font-bold outline-none"><option value="JPY">¥ JPY</option><option value="TWD">$ TWD</option></select></div>
           <div class="w-2/3"><label class="block text-[10px] text-gray-400 mb-1">金額</label><input type="number" id="exp-amount" placeholder="0" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-lg font-bold outline-none"></div>
         </div>
-        <button type="button" onclick="sendData()" id="submit-btn" class="w-full bg-[#C6A682] text-white font-bold rounded-xl py-3.5 shadow-md active:scale-95 transition-all">送出記帳</button>
+
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-2">支付方式</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="selectPayment(this, '現金')" class="pay-btn active-pay w-full bg-[#C6A682] text-white rounded-xl py-2.5 text-xs font-bold transition-all shadow-sm">💵 現金</button>
+            <button type="button" onclick="selectPayment(this, '熊本熊卡')" class="pay-btn w-full bg-gray-50 text-gray-500 rounded-xl py-2.5 text-xs font-bold transition-all">🐻 熊本熊</button>
+            <button type="button" onclick="selectPayment(this, '吉鶴卡')" class="pay-btn w-full bg-gray-50 text-gray-500 rounded-xl py-2.5 text-xs font-bold transition-all">🕊️ 吉鶴卡</button>
+            <button type="button" onclick="selectPayment(this, 'CUBE卡')" class="pay-btn w-full bg-gray-50 text-gray-500 rounded-xl py-2.5 text-xs font-bold transition-all">🧊 CUBE</button>
+            <button type="button" onclick="selectPayment(this, '玉山Wallet')" class="pay-btn w-full bg-gray-50 text-gray-500 rounded-xl py-2.5 text-xs font-bold transition-all">📲 PayPay</button>
+            <button type="button" onclick="selectPayment(this, 'ICOCA')" class="pay-btn w-full bg-gray-50 text-gray-500 rounded-xl py-2.5 text-xs font-bold transition-all">🪪 ICOCA</button>
+          </div>
+          <input type="hidden" id="exp-payment" value="現金">
+        </div>
+
+        <button type="button" onclick="sendData()" id="submit-btn" class="w-full bg-gray-800 text-white font-bold rounded-xl py-3.5 mt-2 shadow-md active:scale-95 transition-all">送出記帳</button>
       </form>
     </div>
   </main>
