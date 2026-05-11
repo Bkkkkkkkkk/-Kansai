@@ -294,6 +294,19 @@
         }
       });
     }
+    // --- 交通卡片收疊邏輯 ---
+    function toggleTransport(element) {
+      const content = element.nextElementSibling;
+      const arrow = element.querySelector('.arrow-icon');
+      
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)'; // 箭頭轉向上
+      } else {
+        content.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';   // 箭頭轉向下
+      }
+    }
     function renderGuide() {
       const container = document.getElementById('guide-list');
       if (!container) return;
