@@ -247,29 +247,53 @@
       daily.forEach(item => {
         const mapUrl = item.Map_URL || item.map_url || '';
         const backup = item.Backup || item.backup || '';
-        
-        container.innerHTML += `
-        <div class="bg-white p-5 rounded-3xl shadow-sm mb-4 relative overflow-hidden">
-          
-          <div class="flex justify-between items-center mb-2">
-            <div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time || ''} - ${item.End_Time || ''}</div>
-            <div class="flex items-center gap-2">
-              ${mapUrl ? `<a href="${mapUrl}" target="_blank" class="bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
-              <div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category || ''}</div>
+        const isTransport = (item.Category === '交通' || item.category === '交通');
+
+        if (isTransport) {
+          // 🚌 交通類別：可收疊式卡片 (更緊湊)
+          container.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl shadow-sm mb-3 border border-gray-100 relative overflow-hidden">
+            <div class="flex justify-between items-center cursor-pointer active:opacity-70 transition-opacity" onclick="toggleTransport(this)">
+              <div class="flex-1">
+                <div class="flex justify-between items-center mb-1">
+                  <div class="text-xs font-bold text-[#C6A682]">${item.Start_Time || ''} - ${item.End_Time || ''}</div>
+                  <div class="flex items-center gap-2">
+                    ${mapUrl ? `<a href="${mapUrl}" target="_blank" onclick="event.stopPropagation()" class="bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-7 h-7 flex items-center justify-center text-xs shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
+                    <div class="text-[10px] bg-gray-50 text-gray-400 px-2 py-0.5 rounded-md flex items-center gap-1">
+                      ${item.Category || ''} <span class="text-[8px] transform transition-transform duration-200 arrow-icon">▼</span>
+                    </div>
+                  </div>
+                </div>
+                <h3 class="text-[15px] font-bold text-gray-800">${item.Subject || ''}</h3>
+              </div>
             </div>
-          </div>
-          
-          <h3 class="text-[17px] font-bold text-gray-800 mb-1">${item.Subject || ''}</h3>
-          <p class="text-sm text-gray-500 mb-2">${item.Description || ''}</p>
-          
-          ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100 flex items-start gap-2"><span>🚃</span> <span>${item.Transport_Hint}</span></div>` : ''}
-          
-          ${backup ? `<div class="mt-2 bg-green-50/50 text-green-800 text-xs p-2.5 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span> <span><b>備案：</b>${backup}</span></div>` : ''}
-          
-        </div>`;
+
+            <div class="hidden transport-content mt-2 pt-2 border-t border-gray-50">
+              ${item.Description ? `<p class="text-xs text-gray-500 mb-2">${item.Description}</p>` : ''}
+              ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-[11px] p-2 rounded-xl border border-blue-100 flex items-start gap-2"><span>🚃</span> <span>${item.Transport_Hint}</span></div>` : ''}
+              ${backup ? `<div class="mt-2 bg-green-50/50 text-green-800 text-[11px] p-2 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span> <span><b>備案：</b>${backup}</span></div>` : ''}
+            </div>
+          </div>`;
+        } else {
+          // ⛩️ 一般類別：景點/餐廳/住宿 (原始大卡片設計)
+          container.innerHTML += `
+          <div class="bg-white p-5 rounded-3xl shadow-sm mb-4 relative overflow-hidden">
+            <div class="flex justify-between items-center mb-2">
+              <div class="text-sm font-bold text-[#D4B59D]">${item.Start_Time || ''} - ${item.End_Time || ''}</div>
+              <div class="flex items-center gap-2">
+                ${mapUrl ? `<a href="${mapUrl}" target="_blank" class="bg-[#FDF8F5] text-[#C6A682] border border-[#E6D5C3] rounded-full w-8 h-8 flex items-center justify-center text-sm shadow-sm active:scale-95 transition-transform">📍</a>` : ''}
+                <div class="text-[10px] bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg">${item.Category || ''}</div>
+              </div>
+            </div>
+            <h3 class="text-[17px] font-bold text-gray-800 mb-1">${item.Subject || ''}</h3>
+            ${item.Description ? `<p class="text-sm text-gray-500 mb-2">${item.Description}</p>` : ''}
+            
+            ${item.Transport_Hint ? `<div class="mt-2 bg-blue-50/50 text-blue-700 text-xs p-2.5 rounded-xl border border-blue-100 flex items-start gap-2"><span>🚃</span> <span>${item.Transport_Hint}</span></div>` : ''}
+            ${backup ? `<div class="mt-2 bg-green-50/50 text-green-800 text-xs p-2.5 rounded-xl border border-green-100 flex items-start gap-2"><span>💡</span> <span><b>備案：</b>${backup}</span></div>` : ''}
+          </div>`;
+        }
       });
     }
-
     function renderGuide() {
       const container = document.getElementById('guide-list');
       if (!container) return;
